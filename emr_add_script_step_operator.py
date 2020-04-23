@@ -4,8 +4,10 @@ from airflow.contrib.operators.emr_add_steps_operator import EmrAddStepsOperator
 from airflow.exceptions import AirflowException
 
 
-# implementation of emr add script step operator
-
+# implementation of emr add spark step operator using retry mechanism that samples the step state
+# on attempt % 3 = 0 action on failure step is termination. e.g: on daily run if step failed 3 times,
+# on 3rd attempt cluster will terminate, and cascades failure to the next job
+# describe_step - is sampling emr step every 5 minutes. if step failed the operator will throw AirflowException
 class EmrAddScriptStepOperator(EmrAddStepsOperator):
 
     template_fields = ['job_flow_id', 'script_path', 'script_params', 'action_on_failure', 'task_id', 'step_name',
